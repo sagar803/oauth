@@ -1,0 +1,31 @@
+span{
+    margin-left: 5%;
+    
+}
+.link{
+    color: aliceblue;
+    text-decoration: none;
+    font-weight: bold;
+    margin-left: 5%;
+    cursor: pointer;
+}
+nav{
+    margin: 15px 0 2% 2%;
+    width: 96%;
+    border-radius: 10px;
+    height: 70px;
+    background-color:#333;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    color: white;
+}
+ul{
+    display: flex;
+    
+}
+li{
+    list-style-type: none ;
+    margin: 10px;
+    padding:10px
+}
