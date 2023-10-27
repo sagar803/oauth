@@ -5,65 +5,64 @@ import Github from "../img/github.png";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-export const Login = (props) => {
+export const Login = ({setIsAuth}) => {
   
   const navigate = useNavigate();
-  const [user, setUser] = useState({
+  const [credentials, setCredentials] = useState({
     email: "",
     password: "",
   })
-  const [inlogin, setInLogin] = useState(true);
- 
-  const handleChange = (e) => {
-    const name = e.target.name;
-    const value = e.target.value;
-    setUser({
-      ...user, 
-      [name]:value
-    })
-  }
+  const [pageType, setPageType] = useState('login');
+
+  const getUser = async () => {
+    try{
+      const response = await fetch("http://localhost:5000/auth/login/success", {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Credentials": true,
+        },
+      })
+      if(response.ok){
+        const data = response.json();
+        console.log(data)
+        localStorage.setItem('user', data.user.__json);
+        localStorage.setItem('user' , data.token);
+      } 
+    } catch (error) {
+      console.log(error);      
+    }
+  };
+  
   const google = () => {
-    window.open("http://oauth-server-virid.vercel.app/auth/google")
+    window.open(`${import.meta.env.VITE_LOCAL}/auth/google`, "_self")
+    getUser();
   }
 
-  const login = async (event) => {
+  const auth = async (event) => {
     event.preventDefault();
-    const { email, password} = user;
-    
-    const loggedInResponse = await fetch("http://oauth-server-virid.vercel.app/api/login",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ email, password})
+    try {
+      const loggedInResponse = await fetch(`${import.meta.env.VITE_LOCAL}/api/${pageType}`,{
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(credentials)
+        }
+      )
+      if (loggedInResponse.ok) {
+        const data = await loggedInResponse.json();
+        localStorage.setItem('user' , data.user.__json);
+        localStorage.setItem('token' , data.token);
+        setIsAuth(true);
       }
-    )
-    const loggedIn = await loggedInResponse.json();
-    if (loggedIn) {
-      props.setUser(loggedIn);
-      console.log(loggedIn)
-      navigate("/");
+    } catch (error) {
+      console.log(error);
     }
   }
-  
-  const register = async (event) => {
-    event.preventDefault();
-    const { email, password} = user;
-    const registerResponse = await fetch("http://oauth-server-virid.vercel.app/register",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ email, password})
-      }
-    )
-    const registered = await registerResponse.json();
-    if (registered) {
-      console.log("registered");
-    }
-  }
+
   
   return (
     <div className="login">
@@ -87,16 +86,26 @@ export const Login = (props) => {
           <div className="line" />
           <div className="or">OR</div>
         </div>
-          <form autoComplete="off" className="right" action="">
-            <input name="email" type="email" placeholder="Email" onChange={handleChange} />
-            <input name="password" type="password" placeholder="Password" onChange={handleChange}/>
-            <button className="submit" onClick={inlogin ? login : register}>{inlogin ? "Login" : "Register" }</button>
-            <p className="loginRegister"
-              onClick={() => setInLogin(!inlogin)}
-              >
-                {inlogin ? "Didn't have an account? Register" : "Already have an account? Login" }
-            </p>
-          </form>
+        <form autoComplete="off" className="right" action="">
+          <input 
+            name="email" 
+            type="email" 
+            placeholder="Email" 
+            value={credentials.email}
+            onChange={(e) => setCredentials({ ...credentials, email: e.target.value })} 
+          />
+          <input 
+            name="password" 
+            type='password' 
+            placeholder="Password" 
+            value={credentials.password}
+            onChange={(e) => setCredentials({ ...credentials, password: e.target.value })} 
+          />
+          <button className="submit" onClick={auth}>{(pageType) === 'login' ? 'login' : 'register'}</button>
+          <p className="loginRegister" onClick={() => setPageType((pageType) === 'login' ? 'register' : 'login')}>
+              {(pageType) === 'login' ? "Didn't have an account? Register" : "Already have an account? Login" }
+          </p>
+        </form>
       </div>
     </div>
   );

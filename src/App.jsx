@@ -7,55 +7,40 @@ import { Login } from './pages/Login'
 import { Post } from './pages/Post'
 
 function App() {
-  const [user, setUser] = useState(null);
-  const [posts, setPosts] = useState(null);
-  
+  const [isAuth, setIsAuth] = useState(false);
+  console.log(isAuth);
+
   useEffect(() => {
-    const getUser = () => {
-      fetch("http://oauth-server-virid.vercel.app/auth/login/success", {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Credentials": true,
-        },
-      })
-        .then((response) => {
-          if (response.status === 200) return response.json();
-          throw new Error("authentication has been failed!");
-        })
-        .then((resObject) => {
-          setUser(resObject);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    };
-    getUser();
-  }, []);
-  console.log(user);
-  if(!user){
-    return null;
-  }
+    const token = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
+
+    console.log(user)
+
+    if (token && user) {
+      setIsAuth(true);
+    } else {
+      setIsAuth(false);
+    }
+  }, [isAuth]);
+
+  
   return (
     <BrowserRouter>
       <div>
-        <Navbar  user={user} setUser={setUser}/>
+        <Navbar />
         <Routes>
           <Route 
               path="/" 
-              element={ user 
-                ? <Home user={user} setUser={setUser} posts={posts} setPosts={setPosts} /> 
-                : <Navigate to="/login"/>} />
+              element={ isAuth ? <Home isAuth={isAuth} setIsAuth={setIsAuth} /> : <Navigate to="/login"/>} 
+          />
           <Route 
               path="/login" 
-              element={<Login user={user} setUser={setUser} />} />
+              element={ isAuth ? <Navigate to="/"/> : <Login isAuth={isAuth} setIsAuth={setIsAuth}/>} 
+          />
           <Route 
               path="/posts/post/:id" 
-              element={ user 
-                ? <Post user={user} setUser={setUser} posts={posts} setPosts={setPosts} /> 
-                : <Navigate to="/login"/>} />  
+              element={ isAuth ? <Post isAuth={isAuth} setIsAuth={setIsAuth}/> : <Navigate to="/login"/>} 
+          />          
         </Routes>
       </div>
     </BrowserRouter>

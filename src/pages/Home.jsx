@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { Card } from "../components/Card"
 import "./Home.css"
 
-export const Home = (props) => {
-  const {posts, setPosts} = props;
-  const token = props.user.token;
+export const Home = ({isAuth, setIsAuth}) => {
+  const [posts, setPosts] = useState();
+  const token = localStorage.getItem('token');
 
   const getPosts = async () => {
-    const response = await fetch(`http://oauth-server-virid.vercel.app/posts/home`, {
+    const response = await fetch(`${import.meta.env.VITE_LOCAL}/posts/home`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -24,7 +24,7 @@ export const Home = (props) => {
 
   return (
     <div className="home">
-        {posts.map((post) => (
+        {posts?.map((post) => (
             <Card key={post._id} post={post} />
         ))}        
     </div>

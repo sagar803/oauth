@@ -4,11 +4,11 @@ import "./Post.css"
 
 export const Post = (props) => {
     const [post, setPost] = useState(null);
-    const token = props.user.token;
+    const token = props.token;
     const {id} = useParams();
 
     const getPost = async () => {
-        const response = await fetch(`http://oauth-server-virid.vercel.app/posts/post/${id}`, {
+        const response = await fetch(`${import.meta.env.VITE_LOCAL}/posts/post/${id}`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
         });
